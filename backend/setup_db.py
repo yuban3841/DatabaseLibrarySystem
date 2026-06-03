@@ -11,8 +11,20 @@ def main():
     print("Library System - DB Setup")
     print("=" * 50)
 
+    # Step 0: 为 reader 表添加 password_hash 列（如不存在）
+    print("\n[0/3] Adding reader password_hash column...")
+    try:
+        db.execute_raw("ALTER TABLE reader ADD password_hash NVARCHAR(255) NULL")
+        print("  password_hash column added.")
+    except Exception as e:
+        err = str(e)
+        if "already exists" in err.lower() or "duplicate" in err.lower():
+            print("  password_hash column already exists (skip).")
+        else:
+            print(f"  WARNING: {e}")
+
     # Step 1: 创建4个存储过程
-    print("\n[1/2] Creating stored procedures...")
+    print("\n[1/3] Creating stored procedures...")
 
     procedures = [
         # 还书
@@ -96,7 +108,7 @@ END');
             print(f"  [{i+1}/4] ERROR: {e}")
 
     # Step 2: bcrypt密码
-    print("\n[2/2] Setting admin passwords...")
+    print("\n[2/3] Setting admin passwords...")
     pwd1 = hash_password("Admin@123")
     pwd2 = hash_password("Lib@123")
 
@@ -104,6 +116,17 @@ END');
     db.execute_update("UPDATE admin SET password_hash=? WHERE username='librarian'", (pwd2,))
     print("  admin     -> Admin@123")
     print("  librarian -> Lib@123")
+
+    # Step 3: 读者密码
+    print("\n[3/3] Setting reader passwords...")
+    reader_pwd = hash_password("Reader@123")
+    readers = db.execute_query("SELECT reader_id FROM reader")
+    for r in readers:
+        db.execute_update(
+            "UPDATE reader SET password_hash=? WHERE reader_id=?",
+            (reader_pwd, r["reader_id"]),
+        )
+        print(f"  {r['reader_id']} -> Reader@123")
 
     # 验证
     procs = db.execute_query("SELECT name FROM sys.procedures ORDER BY name")

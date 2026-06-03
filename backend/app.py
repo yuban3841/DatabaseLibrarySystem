@@ -42,9 +42,16 @@ def server_error(e):
     return jsonify({"code": 500, "message": "服务器内部错误"}), 500
 
 
+from config import HOST, PORT, DEBUG, SSL_CERT, SSL_KEY
+
 if __name__ == "__main__":
     print("\n" + "=" * 50)
     print("  图书管理系统 API")
-    print("  http://localhost:5000")
+    if SSL_CERT and SSL_KEY:
+        print(f"  https://localhost:{PORT}")
+    else:
+        print(f"  http://localhost:{PORT}")
     print("=" * 50)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+
+    ssl_context = (SSL_CERT, SSL_KEY) if SSL_CERT and SSL_KEY else None
+    app.run(host=HOST, port=PORT, debug=DEBUG, ssl_context=ssl_context)

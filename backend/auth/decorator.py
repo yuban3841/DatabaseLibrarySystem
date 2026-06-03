@@ -17,6 +17,7 @@ def login_required(f):
             payload = decode_token(token)
             g.admin_id = payload["admin_id"]
             g.role = payload["role"]
+            g.login_type = payload.get("login_type", "admin")
         except pyjwt.ExpiredSignatureError:
             return {"code": 401, "message": "Token已过期，请重新登录"}, 401
         except pyjwt.InvalidTokenError:

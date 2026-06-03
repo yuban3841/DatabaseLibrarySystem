@@ -27,3 +27,7 @@ JWT_EXPIRE_MINUTES = 120
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "5000"))
 DEBUG = os.getenv("DEBUG", "true").lower() == "true"
+
+# HTTPS（生产环境配置SSL证书路径）
+SSL_CERT = os.getenv("SSL_CERT", "")
+SSL_KEY = os.getenv("SSL_KEY", "")
