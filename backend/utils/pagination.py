@@ -10,9 +10,12 @@ def paginate(base_sql: str, count_sql: str, params: list,
     total = db.execute_one(count_sql, tuple(params))["total"]
     offset = (page - 1) * page_size
 
-    data = db.execute_query(base_sql, tuple(params + [page_size, offset]))
+    # SQL: OFFSET {offset} ROWS FETCH NEXT {page_size} ROWS ONLY
+    data = db.execute_query(base_sql, tuple(params + [offset, page_size]))
 
     return {
+        "code": 200,
+        "message": "success",
         "data": data,
         "page": {
             "page": page,
